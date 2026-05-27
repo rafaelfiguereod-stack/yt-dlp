@@ -545,7 +545,7 @@ class Updater:
 
         variant = detect_variant()
         if variant.startswith('win'):
-            atexit.register(Popen, f'ping 127.0.0.1 -n 5 -w 1000 & del /F "{old_filename}"',
+            atexit.register(Popen, f'ping 127.0.0.1 -n 5 -w 1000 & del /F {shell_quote(old_filename, shell=True)}',
                             shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         elif old_filename:
             try:

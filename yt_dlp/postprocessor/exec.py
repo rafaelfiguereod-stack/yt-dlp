@@ -1,5 +1,9 @@
+import re
+
 from .common import PostProcessor
 from ..utils import Popen, PostProcessingError, shell_quote, variadic
+
+_UNQUOTED_TMPL_RE = re.compile(r'%\([^)]+\)s')
 
 
 class ExecPP(PostProcessor):
@@ -11,6 +15,10 @@ class ExecPP(PostProcessor):
     def parse_cmd(self, cmd, info):
         tmpl, tmpl_dict = self._downloader.prepare_outtmpl(cmd, info)
         if tmpl_dict:  # if there are no replacements, tmpl_dict = {}
+            if _UNQUOTED_TMPL_RE.search(cmd):
+                self.report_warning(
+                    'Exec template contains unquoted substitutions (e.g. %(title)s). '
+                    'Use %(key)q instead to shell-quote metadata values and prevent command injection')
             return self._downloader.escape_outtmpl(tmpl) % tmpl_dict
 
         filepath = info.get('filepath', info.get('_filename'))
